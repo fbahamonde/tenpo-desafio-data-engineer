@@ -67,7 +67,7 @@ def timeit(func):
     return _time_it
 
 @timeit
-def load_model(path):
+def load_model(path: str):
     """
     load the models from disk
     and put them in a dictionary
@@ -85,7 +85,12 @@ def load_model(path):
 def get_json(bucket_name: str, filename: str):
     '''
     this function will get the json object from
-    google cloud storage bucket
+    google cloud storage bucket.
+    Parameters:
+        bucket_name (str): Bucket name in GCP.
+        filename (str): filename in GCS.
+    Returns:
+        json: json data
     '''
     logging.info('Getting file from GCS')
     storage_client = storage.Client()
@@ -98,7 +103,16 @@ def get_json(bucket_name: str, filename: str):
     return file_data
 
 @timeit
-def upload_to_bq(df, table_id: str, truncate: bool = "WRITE_TRUNCATE"):
+def upload_to_bq(df, table_id: str, truncate: str = "WRITE_TRUNCATE"):
+    '''
+    Uploads dataframe to bq.
+    Parameters:
+        df (Dataframe): Dataframe to be uploaded.
+        table_id (str): Table name in Bigquery.
+        truncate (str): Truncate/append.
+    Returns:
+        None
+    '''
     client = bigquery.Client()
     job_config = bigquery.LoadJobConfig(
     write_disposition=truncate,
@@ -111,11 +125,13 @@ def upload_to_bq(df, table_id: str, truncate: bool = "WRITE_TRUNCATE"):
     logging.info('Dataframe uploaded to bq')
 
 @timeit
-def get_metrics(dataframe, model):
-#TODO: terminar
-    plot_roc_curve(xgb_model, X_train, y_train)
-    plot_roc_curve(xgb_model, X_test, y_test)
-    plot_roc_curve(xgb_model, X_train, y_train)
-    print(classification_report(y_train, y_train_prob_predictions > 0.25))
-
-#TODO: terminar update a gcs
+def get_metrics(dataframe):
+    '''
+    Gets precision - recall - F1 score & support from pred
+    Parameters:
+        df (Dataframe): Dataframe with pred and true label.
+    Returns:
+        metrics (dict): Dict with metrics.
+    '''
+    metrics = classification_report(dataframe['target'], dataframe['prob_1'] > 0.25, output_dict=True)
+    return metrics
