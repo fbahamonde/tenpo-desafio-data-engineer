@@ -67,7 +67,7 @@ async def risk_batch_pred(inputs: BatchPredInput):
             upload_to_bq(df_metrics, "tenpo-desafio-data-engineer.riskmodel.risk_model_metrics", 'WRITE_APPEND')
         except Exception as e:
             logging.info(' Column Target was not detected')
-        logging.error(e)
+            logging.error(e)
         return('Done')
     except Exception as e:
         logging.error(e)
