@@ -59,18 +59,21 @@ async def risk_batch_pred(inputs: BatchPredInput):
         now = pd.to_datetime('now')
         df_final['pred_datetime'] = now
         upload_to_bq(df_final, "tenpo-desafio-data-engineer.riskmodel.risk_model_results", 'WRITE_APPEND')
-        metrics = get_metrics(df_final)
-        df_metrics = pd.DataFrame(metrics).transpose()
-        df_metrics['pred_datetime'] = now
-        df_metrics.rename(columns={"f1-score": "F1SCORE"}, inplace = True)
-        upload_to_bq(df_metrics, "tenpo-desafio-data-engineer.riskmodel.risk_model_metrics", 'WRITE_APPEND')
+        try: 
+            metrics = get_metrics(df_final)
+            df_metrics = pd.DataFrame(metrics).transpose()
+            df_metrics['pred_datetime'] = now
+            df_metrics.rename(columns={"f1-score": "F1SCORE"}, inplace = True)
+            upload_to_bq(df_metrics, "tenpo-desafio-data-engineer.riskmodel.risk_model_metrics", 'WRITE_APPEND')
+        except Exception as e:
+            logging.info(' Column Target was not detected')
+        logging.error(e)
         return('Done')
     except Exception as e:
         logging.error(e)
         raise HTTPException(
             status_code=404, detail="File not found"
         )
-        
-    #TODO: Medición
-    #Mejoras: cache respuesta
+
+
     
